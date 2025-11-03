@@ -1,15 +1,108 @@
 services:
-  bind-data:
+  # Zookeeper (requerido por Kafka)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - document-network
+
+  # Kafka Broker
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - document-network
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # Kafka UI (opcional, para visualizar topics y mensajes)
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - document-network
+
+  # LocalStack (simula S3 localmente)
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEBUG=0
+      - PERSISTENCE=0
+    networks:
+      - document-network
+
+  # Aplicación Lambda (Quarkus)
+  document-generator:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: bind-data
+      dockerfile: Dockerfile.dev
+    container_name: document-generator
+    depends_on:
+      kafka:
+        condition: service_healthy
+      localstack:
+        condition: service_started
     volumes:
-      # Montar plantillas desde recursos para desarrollo local
-      - ./infrastructure/src/main/resources/templates:/var/task/templates
+      # Montar código fuente para hot reload
+      - ./domain/src:/app/domain/src
+      - ./application/src:/app/application/src
+      - ./infrastructure/src:/app/infrastructure/src
+      # Montar plantillas
+      - ./infrastructure/src/main/resources/templates:/app/infrastructure/src/main/resources/templates
     ports:
-      - 9090:8080
+      - "8080:8080"
+      - "5005:5005" # Puerto debug
     environment:
-      # Variables de entorno para desarrollo local
-      - QUARKUS_LOG_LEVEL=DEBUG
+      # Quarkus dev mode
       - QUARKUS_PROFILE=dev
+      - QUARKUS_LOG_LEVEL=DEBUG
+
+      # Kafka configuration
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+
+      # S3 configuration (LocalStack)
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - S3_DOCUMENTS_BUCKET=local-documents-bucket
+      - S3_DOCUMENTS_PREFIX=generated-documents
+    networks:
+      - document-network
+
+networks:
+  document-network:
+    driver: bridge

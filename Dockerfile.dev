@@ -1,0 +1,25 @@
+FROM maven:3.9.6-eclipse-temurin-21
+
+WORKDIR /app
+
+# Copiar POMs
+COPY pom.xml .
+COPY domain/pom.xml domain/
+COPY application/pom.xml application/
+COPY infrastructure/pom.xml infrastructure/
+
+# Copiar código fuente
+COPY domain/src domain/src
+COPY application/src application/src
+COPY infrastructure/src infrastructure/src
+
+# IMPORTANTE: Compilar e instalar todos los módulos primero
+# Esto instala domain y application en el repositorio local de Maven
+RUN mvn clean install -DskipTests
+
+# Exponer puertos
+EXPOSE 8080 5005
+
+# Ejecutar en modo dev con hot reload
+# -Ddebug permite remote debugging en puerto 5005
+CMD ["mvn", "quarkus:dev", "-pl", "infrastructure", "-Ddebug=5005", "-Dquarkus.http.host=0.0.0.0"]
