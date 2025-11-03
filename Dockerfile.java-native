@@ -1,0 +1,20 @@
+# Etapa 1: build con Maven
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+
+WORKDIR /build
+COPY pom.xml .
+COPY src ./src
+
+RUN mvn clean install
+RUN mvn package
+
+# Etapa 2: imagen de ejecución para Lambda
+FROM public.ecr.aws/lambda/java:17
+
+# Copiar JAR desde etapa de compilación
+COPY --from=build /build/target/engine-commons-v2*.jar ${LAMBDA_TASK_ROOT}/lib/app.jar
+#COPY --from=build /build/test-output ${LAMBDA_TASK_ROOT}/lib/test-output
+COPY src/test/resources/plantilla.docx ${LAMBDA_TASK_ROOT}/template/plantilla.docx
+COPY src/test/resources/plantilla.odt ${LAMBDA_TASK_ROOT}/template/plantilla.odt
+# Definir el handler
+CMD ["pe.soapros.document.infrastructure.lambda.DocumentLambdaHandler::handleRequest"]

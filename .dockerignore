@@ -1,0 +1,23 @@
+# Directorios comunes de build
+target/
+bin/
+build/
+
+# Configuración de IDEs
+.idea/
+.vscode/
+*.iml
+
+# Archivos temporales del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de control de versiones
+.git/
+.gitignore
+.gitattributes
+
+# Archivos del sistema operativo
+*.swp
+*.bak
+*.tmp

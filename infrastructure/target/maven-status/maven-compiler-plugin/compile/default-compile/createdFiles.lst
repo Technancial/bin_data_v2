@@ -1,0 +1,10 @@
+pe/soapros/document/infrastructure/generation/input/TemplateData.class
+pe/soapros/document/infrastructure/generation/XDocPdfGenerator.class
+pe/soapros/document/infrastructure/qualifier/Pdf.class
+pe/soapros/document/infrastructure/mapper/TemplateDataMapper.class
+pe/soapros/document/infrastructure/util/VariableExtractor.class
+pe/soapros/document/infrastructure/config/UseCaseProducer.class
+pe/soapros/document/infrastructure/lambda/rest/DocumentLambdaResource.class
+pe/soapros/document/infrastructure/mapper/TemplateDataMapper$1.class
+pe/soapros/document/infrastructure/util/Util.class
+pe/soapros/document/infrastructure/lambda/kafka/DocumentKafkaConsumer.class

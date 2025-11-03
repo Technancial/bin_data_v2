@@ -1,0 +1,9 @@
+/Users/furth/Documents/02-Fuentes/05-Java/engine-commons-v2/infrastructure/src/main/java/pe/soapros/document/infrastructure/lambda/rest/DocumentLambdaResource.java
+/Users/furth/Documents/02-Fuentes/05-Java/engine-commons-v2/infrastructure/src/main/java/pe/soapros/document/infrastructure/generation/input/TemplateData.java
+/Users/furth/Documents/02-Fuentes/05-Java/engine-commons-v2/infrastructure/src/main/java/pe/soapros/document/infrastructure/util/Util.java
+/Users/furth/Documents/02-Fuentes/05-Java/engine-commons-v2/infrastructure/src/main/java/pe/soapros/document/infrastructure/qualifier/Pdf.java
+/Users/furth/Documents/02-Fuentes/05-Java/engine-commons-v2/infrastructure/src/main/java/pe/soapros/document/infrastructure/generation/XDocPdfGenerator.java
+/Users/furth/Documents/02-Fuentes/05-Java/engine-commons-v2/infrastructure/src/main/java/pe/soapros/document/infrastructure/util/VariableExtractor.java
+/Users/furth/Documents/02-Fuentes/05-Java/engine-commons-v2/infrastructure/src/main/java/pe/soapros/document/infrastructure/mapper/TemplateDataMapper.java
+/Users/furth/Documents/02-Fuentes/05-Java/engine-commons-v2/infrastructure/src/main/java/pe/soapros/document/infrastructure/lambda/kafka/DocumentKafkaConsumer.java
+/Users/furth/Documents/02-Fuentes/05-Java/engine-commons-v2/infrastructure/src/main/java/pe/soapros/document/infrastructure/config/UseCaseProducer.java

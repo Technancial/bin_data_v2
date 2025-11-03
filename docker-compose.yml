@@ -1,0 +1,15 @@
+services:
+  bind-data:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bind-data
+    volumes:
+      # Montar plantillas desde recursos para desarrollo local
+      - ./infrastructure/src/main/resources/templates:/var/task/templates
+    ports:
+      - 9090:8080
+    environment:
+      # Variables de entorno para desarrollo local
+      - QUARKUS_LOG_LEVEL=DEBUG
+      - QUARKUS_PROFILE=dev
