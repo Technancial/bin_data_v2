@@ -1,0 +1,10 @@
+{
+  "resource": "/generate",
+  "path": "/generate",
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"templatePath\":\"plantilla.docx\",\"data\":{\"nombre\":\"Juan Pérez\",\"empresa\":\"ACME Corp\",\"monto\":5000,\"fecha\":\"03/11/2025\"},\"images\":null}",
+  "isBase64Encoded": false
+}

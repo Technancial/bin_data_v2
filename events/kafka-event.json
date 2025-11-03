@@ -1,0 +1,29 @@
+{
+  "eventSource": "aws:kafka",
+  "eventSourceArn": "arn:aws:kafka:us-east-1:123456789012:cluster/my-cluster/abcd1234-5678-90ef-ghij-klmnopqrstuv",
+  "bootstrapServers": "kafka-broker-1.example.com:9092,kafka-broker-2.example.com:9092",
+  "records": {
+    "document-requests-0": [
+      {
+        "topic": "document-requests",
+        "partition": 0,
+        "offset": 123,
+        "timestamp": 1699876543000,
+        "timestampType": "CREATE_TIME",
+        "key": "request-001",
+        "value": "eyJ0ZW1wbGF0ZVBhdGgiOiJwbGFudGlsbGEuZG9jeCIsImRhdGEiOnsibm9tYnJlIjoiSnVhbiBQw6lyZXoiLCJlbXByZXNhIjoiQUNNRSBDb3JwIiwibW9udG8iOjUwMDAsImZlY2hhIjoiMDMvMTEvMjAyNSJ9LCJpbWFnZXMiOm51bGx9",
+        "headers": []
+      },
+      {
+        "topic": "document-requests",
+        "partition": 0,
+        "offset": 124,
+        "timestamp": 1699876544000,
+        "timestampType": "CREATE_TIME",
+        "key": "request-002",
+        "value": "eyJ0ZW1wbGF0ZVBhdGgiOiJwbGFudGlsbGEuZG9jeCIsImRhdGEiOnsibm9tYnJlIjoiTWFyw61hIEfDs21leiIsImVtcHJlc2EiOiJUZWNoIFN0YXJ0dXAiLCJtb250byI6NzUwMCwiZmVjaGEiOiIwMy8xMS8yMDI1In0sImltYWdlcyI6bnVsbH0=",
+        "headers": []
+      }
+    ]
+  }
+}
