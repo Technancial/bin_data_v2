@@ -7,6 +7,7 @@ import pe.soapros.document.domain.TemplateRepository;
 import pe.soapros.document.domain.exception.TemplateNotFoundException;
 import pe.soapros.document.infrastructure.repository.downloader.TemplateDownloader;
 import pe.soapros.document.infrastructure.repository.downloader.TemplateDownloaderFactory;
+import pe.soapros.document.infrastructure.util.LogSanitizer;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +41,7 @@ import java.util.HexFormat;
  */
 @ApplicationScoped
 @JBossLog
-public class S3TemplateRepository implements TemplateRepository {
+public class InfraTemplateRepository implements TemplateRepository {
 
     @Inject
     TemplateDownloaderFactory downloaderFactory;
@@ -68,7 +69,8 @@ public class S3TemplateRepository implements TemplateRepository {
 
         // If it's already a local/classpath path (no protocol), don't cache it
         if (!hasProtocol(uriFile)) {
-            log.debugf("Template has no protocol, treating as local/classpath: %s", uriFile);
+            log.debugf("Template has no protocol, treating as local/classpath: %s",
+                LogSanitizer.sanitizeTemplatePath(uriFile));
             File localFile = new File(uriFile);
             if (!localFile.exists()) {
                 // Try classpath (will be handled by XDocPdfGenerator)
@@ -86,7 +88,8 @@ public class S3TemplateRepository implements TemplateRepository {
         }
 
         // Not in cache or expired, download it
-        log.infof("Template not in cache or expired, downloading: %s", uriFile);
+        log.infof("Template not in cache or expired, downloading: %s",
+            LogSanitizer.sanitizeTemplatePath(uriFile));
         return downloadAndCache(uriFile, cachedFile);
     }
 
@@ -115,9 +118,11 @@ public class S3TemplateRepository implements TemplateRepository {
         boolean isLocal = !hasProtocol(uriFile);
 
         if (isLocal) {
-            log.debugf("Template is a direct local path (no protocol): %s", uriFile);
+            log.debugf("Template is a direct local path (no protocol): %s",
+                LogSanitizer.sanitizeTemplatePath(uriFile));
         } else {
-            log.debugf("Template has protocol, will use cache system: %s", uriFile);
+            log.debugf("Template has protocol, will use cache system: %s",
+                LogSanitizer.sanitizeTemplatePath(uriFile));
         }
 
         return isLocal;
@@ -158,13 +163,15 @@ public class S3TemplateRepository implements TemplateRepository {
             // Download
             downloader.download(uri, targetFile);
 
-            log.infof("Template downloaded and cached: %s (%d bytes)",
-                    targetFile.getAbsolutePath(), targetFile.length());
+            log.infof("Template downloaded and cached: %s (%s)",
+                LogSanitizer.sanitizePath(targetFile.getName()),
+                LogSanitizer.sanitizeByteCount(targetFile.length()));
 
             return targetFile;
 
         } catch (Exception e) {
-            log.errorf(e, "Failed to download template: %s", uri);
+            log.errorf(e, "Failed to download template: %s",
+                LogSanitizer.sanitizeTemplatePath(uri));
             throw new TemplateNotFoundException("Failed to download template: " + e.getMessage());
         }
     }

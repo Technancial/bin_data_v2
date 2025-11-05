@@ -15,6 +15,7 @@ import pe.soapros.document.domain.DocumentResult;
 import pe.soapros.document.domain.TemplateRequest;
 import pe.soapros.document.infrastructure.generation.input.SentryMessageInput;
 import pe.soapros.document.infrastructure.mapper.SentryMessageMapper;
+import pe.soapros.document.infrastructure.util.LogSanitizer;
 
 import java.io.File;
 import java.util.HashMap;
@@ -173,13 +174,13 @@ public class LambdaMskEventHandler {
      */
     private DocumentResult generateDocument(TemplateRequest template) {
         log.debugf("Generating document - template: %s, format: %s",
-            template.getTemplatePath(), template.getFileType());
+            LogSanitizer.sanitizeTemplatePath(template.getTemplatePath()), template.getFileType());
 
         String pathFile = generateFilename(template.getFileType());
         DocumentResult result = generateDocumentUseCase.execute(template, pathFile);
 
         if (result.getRepositoryPath() != null) {
-            log.debugf("Document persisted: %s", result.getRepositoryPath());
+            log.debugf("Document persisted: %s", LogSanitizer.sanitizeS3Uri(result.getRepositoryPath()));
         }
 
         return result;

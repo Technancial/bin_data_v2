@@ -16,6 +16,7 @@ import pe.soapros.document.domain.TemplateRequest;
 import pe.soapros.document.domain.exception.DocumentGenerationException;
 import pe.soapros.document.infrastructure.generation.input.SentryMessageInput;
 import pe.soapros.document.infrastructure.mapper.SentryMessageMapper;
+import pe.soapros.document.infrastructure.util.LogSanitizer;
 
 import java.io.File;
 import java.util.List;
@@ -112,23 +113,24 @@ public class DocumentLambdaResource {
     private DocumentResult generateDocument(TemplateRequest template) {
         // Log only safe metadata, not the entire object with user data
         log.infof("Generating document - template: %s, fileType: %s, dataFields: %d, hasImages: %s, persist: %s",
-                template.getTemplatePath(),
+                LogSanitizer.sanitizeTemplatePath(template.getTemplatePath()),
                 template.getFileType(),
                 template.getData() != null ? template.getData().size() : 0,
                 template.getImages() != null && !template.getImages().isEmpty(),
                 template.isPersist());
 
         String pathFile = generateFilename(template.getFileType());
-        log.infof("PathFile: %s", pathFile);
+        log.debugf("Generated filename: %s", LogSanitizer.sanitizePath(pathFile));
 
         DocumentResult result = generateDocumentUseCase.execute(template, pathFile);
 
         String filename = new File(pathFile).getName();
-        log.debugf("Document generated: %s (%d bytes)", filename, result.getDocumentBytes().length);
+        log.debugf("Document generated: %s (%s)", filename,
+            LogSanitizer.sanitizeByteCount(result.getDocumentBytes().length));
 
         // Log repository path if document was persisted
         if (result.getRepositoryPath() != null) {
-            log.infof("Document persisted: %s", result.getRepositoryPath());
+            log.infof("Document persisted: %s", LogSanitizer.sanitizeS3Uri(result.getRepositoryPath()));
         }
 
         return result;

@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import lombok.extern.jbosslog.JBossLog;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import pe.soapros.document.infrastructure.util.LogSanitizer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -44,7 +45,8 @@ public class AwsClientProducer {
         // Si hay endpoint configurado (LocalStack en dev), usarlo
         if (s3Endpoint.isPresent() && !s3Endpoint.get().isEmpty()) {
             String endpoint = s3Endpoint.get();
-            log.infof("Creating S3 client for LocalStack at: %s", endpoint);
+            log.infof("Creating S3 client for LocalStack at: %s",
+                LogSanitizer.sanitizeHttpUrl(endpoint));
 
             builder.endpointOverride(URI.create(endpoint))
                    .credentialsProvider(

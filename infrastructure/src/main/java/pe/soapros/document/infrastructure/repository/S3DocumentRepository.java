@@ -6,6 +6,7 @@ import lombok.extern.jbosslog.JBossLog;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import pe.soapros.document.domain.DocumentRepository;
 import pe.soapros.document.domain.exception.DocumentGenerationException;
+import pe.soapros.document.infrastructure.util.LogSanitizer;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -62,8 +63,9 @@ public class S3DocumentRepository implements DocumentRepository {
             // Prepare metadata for future searches
             Map<String, String> metadata = buildMetadata(file);
 
-            log.infof("Uploading document to S3: s3://%s/%s (%d bytes)",
-                     documentsBucket, s3Key, file.length());
+            log.infof("Uploading document to S3: %s (%s)",
+                     LogSanitizer.sanitizePath(s3Key),
+                     LogSanitizer.sanitizeByteCount(file.length()));
 
             // Build S3 put request with metadata
             PutObjectRequest putRequest = PutObjectRequest.builder()
@@ -77,15 +79,16 @@ public class S3DocumentRepository implements DocumentRepository {
             // Upload to S3
             s3Client.putObject(putRequest, RequestBody.fromFile(file));
 
-            log.infof("Document successfully uploaded to S3: s3://%s/%s", documentsBucket, s3Key);
+            log.infof("Document successfully uploaded: %s", LogSanitizer.sanitizePath(s3Key));
 
             // Return path in protocol format: s3@:bucket/key
             // The ':' indicates using the configured bucket
             return String.format("s3@:%s/%s", documentsBucket, s3Key);
 
         } catch (Exception e) {
-            log.errorf(e, "Failed to upload document to S3: %s", filePathToUpload);
-            throw new DocumentGenerationException("Failed to save document to S3: " + e.getMessage(), e);
+            log.errorf(e, "Failed to upload document: %s",
+                LogSanitizer.sanitizeErrorMessage(e.getMessage()));
+            throw new DocumentGenerationException("Failed to save document to S3", e);
         }
     }
 

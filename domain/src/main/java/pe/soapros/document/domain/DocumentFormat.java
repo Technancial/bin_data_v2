@@ -1,9 +1,12 @@
 package pe.soapros.document.domain;
 
+import lombok.Getter;
+
 /**
  * Enumeration representing supported document output formats.
  * Each format includes its file extension and MIME type for proper handling.
  */
+@Getter
 public enum DocumentFormat {
     PDF("pdf", "application/pdf"),
     HTML("html", "text/html"),
@@ -15,14 +18,6 @@ public enum DocumentFormat {
     DocumentFormat(String extension, String mimeType) {
         this.extension = extension;
         this.mimeType = mimeType;
-    }
-
-    public String getExtension() {
-        return extension;
-    }
-
-    public String getMimeType() {
-        return mimeType;
     }
 
     /**

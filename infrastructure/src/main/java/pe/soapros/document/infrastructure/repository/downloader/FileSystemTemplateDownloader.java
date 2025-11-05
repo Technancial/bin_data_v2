@@ -2,6 +2,7 @@ package pe.soapros.document.infrastructure.repository.downloader;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.jbosslog.JBossLog;
+import pe.soapros.document.infrastructure.util.LogSanitizer;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,27 +30,30 @@ public class FileSystemTemplateDownloader implements TemplateDownloader {
 
     @Override
     public void download(String uri, File targetFile) throws Exception {
-        log.infof("Copying from filesystem: %s", uri);
+        log.infof("Copying from filesystem: %s", LogSanitizer.sanitizePath(uri));
 
         // Remove "fs@" prefix to get the actual path
         String sourcePath = uri.substring(3);
         File sourceFile = new File(sourcePath);
 
         if (!sourceFile.exists()) {
-            throw new IOException("Source file not found: " + sourcePath);
+            throw new IOException("Source file not found: " + LogSanitizer.sanitizePath(sourcePath));
         }
 
         if (!sourceFile.canRead()) {
-            throw new IOException("Cannot read source file: " + sourcePath);
+            throw new IOException("Cannot read source file: " + LogSanitizer.sanitizePath(sourcePath));
         }
 
         // Copy to target
         try {
             Files.copy(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            log.infof("Copied %d bytes from %s to %s",
-                    sourceFile.length(), sourceFile.getName(), targetFile.getName());
+            log.infof("Copied %s from %s to %s",
+                LogSanitizer.sanitizeByteCount(sourceFile.length()),
+                LogSanitizer.sanitizePath(sourceFile.getName()),
+                LogSanitizer.sanitizePath(targetFile.getName()));
         } catch (IOException e) {
-            log.errorf(e, "Failed to copy from filesystem: %s", uri);
+            log.errorf(e, "Failed to copy from filesystem: %s",
+                LogSanitizer.sanitizePath(uri));
             throw e;
         }
     }

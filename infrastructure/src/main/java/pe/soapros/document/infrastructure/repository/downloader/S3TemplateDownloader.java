@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.jbosslog.JBossLog;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import pe.soapros.document.infrastructure.util.LogSanitizer;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -35,11 +36,13 @@ public class S3TemplateDownloader implements TemplateDownloader {
 
     @Override
     public void download(String uri, File targetFile) throws Exception {
-        log.infof("Downloading from S3: %s", uri);
+        log.infof("Downloading from S3: %s", LogSanitizer.sanitizeS3Uri(uri));
 
         // Parse S3 URI
         S3UriInfo uriInfo = parseS3Uri(uri);
-        log.debugf("Parsed S3 URI - bucket: %s, key: %s", uriInfo.bucket, uriInfo.key);
+        log.debugf("Parsed S3 URI - bucket: %s, key: %s",
+            LogSanitizer.sanitizeBucketName(uriInfo.bucket),
+            LogSanitizer.sanitizePath(uriInfo.key));
 
         // Download from S3
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
@@ -59,9 +62,12 @@ public class S3TemplateDownloader implements TemplateDownloader {
                 totalBytes += bytesRead;
             }
 
-            log.infof("Downloaded %d bytes from S3 to %s", totalBytes, targetFile.getName());
+            log.infof("Downloaded %s from S3 to %s",
+                LogSanitizer.sanitizeByteCount(totalBytes),
+                LogSanitizer.sanitizePath(targetFile.getName()));
         } catch (IOException e) {
-            log.errorf(e, "Failed to download from S3: %s", uri);
+            log.errorf(e, "Failed to download from S3: %s",
+                LogSanitizer.sanitizeS3Uri(uri));
             throw e;
         }
     }

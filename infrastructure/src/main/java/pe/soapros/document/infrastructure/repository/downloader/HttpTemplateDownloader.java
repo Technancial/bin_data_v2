@@ -2,6 +2,7 @@ package pe.soapros.document.infrastructure.repository.downloader;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.jbosslog.JBossLog;
+import pe.soapros.document.infrastructure.util.LogSanitizer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -40,11 +41,11 @@ public class HttpTemplateDownloader implements TemplateDownloader {
 
     @Override
     public void download(String uri, File targetFile) throws Exception {
-        log.infof("Downloading from HTTP(S): %s", uri);
+        log.infof("Downloading from HTTP(S): %s", LogSanitizer.sanitizeHttpUrl(uri));
 
         // Extract actual URL
         String actualUrl = extractUrl(uri);
-        log.debugf("Actual URL: %s", actualUrl);
+        log.debugf("Actual URL: %s", LogSanitizer.sanitizeHttpUrl(actualUrl));
 
         // Download
         URL url = URI.create(actualUrl).toURL();
@@ -56,7 +57,8 @@ public class HttpTemplateDownloader implements TemplateDownloader {
         try {
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new IOException("HTTP error: " + responseCode + " for URL: " + actualUrl);
+                throw new IOException("HTTP error: " + responseCode + " for URL: " +
+                    LogSanitizer.sanitizeHttpUrl(actualUrl));
             }
 
             try (InputStream in = connection.getInputStream();
@@ -71,11 +73,14 @@ public class HttpTemplateDownloader implements TemplateDownloader {
                     totalBytes += bytesRead;
                 }
 
-                log.infof("Downloaded %d bytes from %s to %s",
-                        totalBytes, actualUrl, targetFile.getName());
+                log.infof("Downloaded %s from %s to %s",
+                    LogSanitizer.sanitizeByteCount(totalBytes),
+                    LogSanitizer.sanitizeHttpUrl(actualUrl),
+                    LogSanitizer.sanitizePath(targetFile.getName()));
             }
         } catch (IOException e) {
-            log.errorf(e, "Failed to download from HTTP(S): %s", uri);
+            log.errorf(e, "Failed to download from HTTP(S): %s",
+                LogSanitizer.sanitizeHttpUrl(uri));
             throw e;
         } finally {
             connection.disconnect();

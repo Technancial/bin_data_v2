@@ -1,9 +1,6 @@
 package pe.soapros.document.application;
 
-import pe.soapros.document.domain.DocumentGenerator;
-import pe.soapros.document.domain.DocumentRepository;
-import pe.soapros.document.domain.TemplateRepository;
-import pe.soapros.document.domain.TemplateRequest;
+import pe.soapros.document.domain.*;
 import pe.soapros.document.domain.exception.DocumentGenerationException;
 import pe.soapros.document.domain.exception.TemplateProcessingException;
 
@@ -25,6 +22,7 @@ public class GenerateDocumentUseCase {
      *
      * @param generatorFactory factory to select the appropriate generator
      * @param repository repository for document persistence
+     * @param templateRepository repository for template
      */
     public GenerateDocumentUseCase(DocumentGeneratorFactory generatorFactory, DocumentRepository repository, TemplateRepository templateRepository) {
         this.generatorFactory = generatorFactory;
@@ -49,7 +47,7 @@ public class GenerateDocumentUseCase {
      * @return DocumentResult containing the document bytes and paths
      * @throws DocumentGenerationException if any error occurs during generation
      */
-    public pe.soapros.document.domain.DocumentResult execute(TemplateRequest data, String pathFile) throws DocumentGenerationException {
+    public DocumentResult execute(TemplateRequest data, String pathFile) throws DocumentGenerationException {
         DocumentGenerator generator = generatorFactory.getGenerator(data.getFileType());
 
         // Obtener el template (descargarlo/copiarlo al caché si tiene protocolo)
@@ -75,6 +73,6 @@ public class GenerateDocumentUseCase {
             repositoryPath = this.repository.save(pathFile);
         }
 
-        return new pe.soapros.document.domain.DocumentResult(documentGenerate, pathFile, repositoryPath);
+        return new DocumentResult(documentGenerate, pathFile, repositoryPath);
     }
 }
