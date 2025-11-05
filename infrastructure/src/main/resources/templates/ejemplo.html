@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documento Generado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .info-section {
+            margin: 20px 0;
+        }
+        .info-row {
+            display: flex;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-label {
+            font-weight: bold;
+            min-width: 150px;
+            color: #666;
+        }
+        .info-value {
+            color: #333;
+        }
+        .logo {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .logo img {
+            max-width: 200px;
+            height: auto;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {{#imagen_logo}}
+        <div class="logo">
+            <img src="{{imagen_logo}}" alt="Logo" />
+        </div>
+        {{/imagen_logo}}
+
+        <h1>{{titulo}}</h1>
+
+        <div class="info-section">
+            <div class="info-row">
+                <span class="info-label">Nombre:</span>
+                <span class="info-value">{{nombre}}</span>
+            </div>
+
+            {{#empresa}}
+            <div class="info-row">
+                <span class="info-label">Empresa:</span>
+                <span class="info-value">{{empresa}}</span>
+            </div>
+            {{/empresa}}
+
+            {{#monto}}
+            <div class="info-row">
+                <span class="info-label">Monto:</span>
+                <span class="info-value">S/ {{monto}}</span>
+            </div>
+            {{/monto}}
+
+            {{#fecha}}
+            <div class="info-row">
+                <span class="info-label">Fecha:</span>
+                <span class="info-value">{{fecha}}</span>
+            </div>
+            {{/fecha}}
+
+            {{#codigo}}
+            <div class="info-row">
+                <span class="info-label">Código:</span>
+                <span class="info-value">{{codigo}}</span>
+            </div>
+            {{/codigo}}
+        </div>
+
+        <div class="footer">
+            Documento generado automáticamente | {{fecha}}
+        </div>
+    </div>
+</body>
+</html>

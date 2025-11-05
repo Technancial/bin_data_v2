@@ -31,7 +31,6 @@
     <mustache.version>0.9.10</mustache.version>
     <xdocreport.version>2.1.0</xdocreport.version>
     <lombok.version>1.18.30</lombok.version>
-    <log4j.version>2.20.0</log4j.version>
     <xerces.version>2.12.2</xerces.version>
     <commons-compress.version>1.27.1</commons-compress.version>
     <smallrye-mutiny-vertx-core.version>3.19.1</smallrye-mutiny-vertx-core.version>
@@ -116,6 +115,11 @@
         <groupId>xerces</groupId>
         <artifactId>xercesImpl</artifactId>
         <version>${xerces.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.f4b6a3</groupId>
+        <artifactId>ulid-creator</artifactId>
+        <version>5.2.3</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

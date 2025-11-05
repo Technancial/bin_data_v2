@@ -1,4 +1,4 @@
-package pe.soapros.document.infrastructure.generation;
+package pe.soapros.document.infrastructure.generation.pdf;
 
 import fr.opensagres.xdocreport.converter.ConverterTypeTo;
 import fr.opensagres.xdocreport.converter.Options;
@@ -93,9 +93,8 @@ public class XDocPdfGenerator implements DocumentGenerator {
             Options options = Options.getTo(ConverterTypeTo.PDF);
             report.convert(context, options, out);
 
-            byte[] result = out.toByteArray();
-            log.debugf("Successfully generated PDF document (%d bytes)", result.length);
-            return result;
+            return out.toByteArray();
+
 
         } catch (TemplateNotFoundException | InvalidTemplateDataException e) {
             // Re-throw domain exceptions as-is

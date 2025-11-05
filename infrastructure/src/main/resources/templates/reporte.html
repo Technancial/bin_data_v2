@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte - {{titulo}}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            flex: 0 0 auto;
+        }
+        .logo img {
+            max-width: 150px;
+            height: auto;
+        }
+        .header-info {
+            flex: 1;
+            text-align: right;
+        }
+        h1 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #999;
+            font-size: 14px;
+        }
+        .section {
+            margin: 30px 0;
+        }
+        .section-title {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #eee;
+        }
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .data-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .data-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        .data-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .highlight h2 {
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            {{#imagen_logo}}
+            <div class="logo">
+                <img src="{{imagen_logo}}" alt="Logo" />
+            </div>
+            {{/imagen_logo}}
+            <div class="header-info">
+                <h1>{{titulo}}</h1>
+                <div class="subtitle">Generado el {{fecha}}</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="data-grid">
+                <div class="data-card">
+                    <div class="data-label">Cliente</div>
+                    <div class="data-value">{{nombre}}</div>
+                </div>
+
+                {{#empresa}}
+                <div class="data-card">
+                    <div class="data-label">Empresa</div>
+                    <div class="data-value">{{empresa}}</div>
+                </div>
+                {{/empresa}}
+
+                {{#codigo}}
+                <div class="data-card">
+                    <div class="data-label">Código</div>
+                    <div class="data-value">{{codigo}}</div>
+                </div>
+                {{/codigo}}
+
+                {{#monto}}
+                <div class="data-card">
+                    <div class="data-label">Monto</div>
+                    <div class="data-value">S/ {{monto}}</div>
+                </div>
+                {{/monto}}
+            </div>
+        </div>
+
+        {{#descripcion}}
+        <div class="section">
+            <h2 class="section-title">Descripción</h2>
+            <p>{{descripcion}}</p>
+        </div>
+        {{/descripcion}}
+
+        {{#items}}
+        <div class="section">
+            <h2 class="section-title">Detalle de Items</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#items}}
+                    <tr>
+                        <td>{{item}}</td>
+                        <td>{{descripcion}}</td>
+                        <td>{{cantidad}}</td>
+                        <td>S/ {{precio}}</td>
+                    </tr>
+                    {{/items}}
+                </tbody>
+            </table>
+        </div>
+        {{/items}}
+
+        <div class="footer">
+            <p>Documento generado automáticamente por el sistema</p>
+            <p>Fecha: {{fecha}} | Código: {{codigo}}</p>
+        </div>
+    </div>
+</body>
+</html>

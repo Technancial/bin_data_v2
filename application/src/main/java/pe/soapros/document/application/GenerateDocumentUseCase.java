@@ -1,33 +1,80 @@
 package pe.soapros.document.application;
 
 import pe.soapros.document.domain.DocumentGenerator;
+import pe.soapros.document.domain.DocumentRepository;
+import pe.soapros.document.domain.TemplateRepository;
 import pe.soapros.document.domain.TemplateRequest;
 import pe.soapros.document.domain.exception.DocumentGenerationException;
+import pe.soapros.document.domain.exception.TemplateProcessingException;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
- * Use case for generating PDF documents from templates.
- * This orchestrates the document generation process using the domain's DocumentGenerator port.
+ * Use case for generating documents from templates in various formats (PDF, HTML, TXT).
+ * This orchestrates the document generation process using the appropriate generator
+ * based on the requested format.
  */
 public class GenerateDocumentUseCase {
-    private final DocumentGenerator generator;
+    private final DocumentGeneratorFactory generatorFactory;
+    private final DocumentRepository repository;
+    private final TemplateRepository templateRepository;
 
     /**
-     * Constructor injection of the document generator implementation.
+     * Constructor injection with factory for multi-format support.
      *
-     * @param generator the document generator to use
+     * @param generatorFactory factory to select the appropriate generator
+     * @param repository repository for document persistence
      */
-    public GenerateDocumentUseCase(DocumentGenerator generator) {
-        this.generator = generator;
+    public GenerateDocumentUseCase(DocumentGeneratorFactory generatorFactory, DocumentRepository repository, TemplateRepository templateRepository) {
+        this.generatorFactory = generatorFactory;
+        this.repository = repository;
+        this.templateRepository = templateRepository;
+    }
+
+    /**
+     * Interface for the factory to allow dependency inversion.
+     * This allows the application layer to depend on an abstraction, not a concrete infrastructure class.
+     */
+    public interface DocumentGeneratorFactory {
+        DocumentGenerator getGenerator(String fileType);
     }
 
     /**
      * Executes the document generation use case.
+     * Selects the appropriate generator based on the fileType in the request.
      *
      * @param data the template request with all required data
-     * @return byte array containing the generated PDF document
+     * @param pathFile the path where the document should be saved locally
+     * @return DocumentResult containing the document bytes and paths
      * @throws DocumentGenerationException if any error occurs during generation
      */
-    public byte[] execute(TemplateRequest data) throws DocumentGenerationException {
-        return generator.generate(data);
+    public pe.soapros.document.domain.DocumentResult execute(TemplateRequest data, String pathFile) throws DocumentGenerationException {
+        DocumentGenerator generator = generatorFactory.getGenerator(data.getFileType());
+
+        // Obtener el template (descargarlo/copiarlo al caché si tiene protocolo)
+        if (!templateRepository.isLocal(data.getTemplatePath())) {
+            java.io.File localTemplateFile = templateRepository.getTemplate(data.getTemplatePath());
+            // Update the template path to point to the local cached file (bypasses validation)
+            data.setResolvedTemplatePath(localTemplateFile.getAbsolutePath());
+        }
+
+        // Generate the document
+        byte[] documentGenerate = generator.generate(data);
+
+        // Write to local filesystem
+        try (FileOutputStream os = new FileOutputStream(pathFile)) {
+            os.write(documentGenerate);
+        } catch (IOException e) {
+            throw new TemplateProcessingException("Failed to write document to file path: " + pathFile, e);
+        }
+
+        // Persist to repository if requested
+        String repositoryPath = null;
+        if (data.isPersist()) {
+            repositoryPath = this.repository.save(pathFile);
+        }
+
+        return new pe.soapros.document.domain.DocumentResult(documentGenerate, pathFile, repositoryPath);
     }
 }

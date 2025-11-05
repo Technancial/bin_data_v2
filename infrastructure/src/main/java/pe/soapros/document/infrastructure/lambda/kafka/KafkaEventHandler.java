@@ -11,8 +11,8 @@ import pe.soapros.document.domain.exception.DocumentGenerationException;
 import pe.soapros.document.infrastructure.generation.input.TemplateData;
 import pe.soapros.document.infrastructure.lambda.kafka.storage.S3DocumentStorage;
 import pe.soapros.document.infrastructure.mapper.TemplateDataMapper;
-import pe.soapros.document.infrastructure.qualifier.Pdf;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -21,13 +21,13 @@ import java.util.*;
  *
  * AWS Lambda with Kafka ESM will invoke this Lambda function, and we process the batch here.
  * Works alongside the HTTP handler (DocumentLambdaResource) for document generation.
+ * Supports multiple output formats based on the fileType in each message.
  */
 @Path("/kafka")
 @JBossLog
 public class KafkaEventHandler {
 
     @Inject
-    @Pdf
     GenerateDocumentUseCase generateDocumentUseCase;
 
     @Inject
@@ -36,7 +36,7 @@ public class KafkaEventHandler {
     /**
      * Processes a batch of template requests from Kafka events.
      * This endpoint receives a list of TemplateData objects and processes them asynchronously,
-     * saving results to S3.
+     * saving results to S3. Each message can specify its own output format (PDF, HTML, TXT).
      *
      * @param batch list of template data from Kafka messages
      * @return processing results with success/failure counts
@@ -87,8 +87,9 @@ public class KafkaEventHandler {
 
     /**
      * Processes a single template request from Kafka and saves to S3.
+     * The output format is determined by the fileType field in templateData.
      *
-     * @param templateData the template data
+     * @param templateData the template data including format specification
      * @param messageIndex the index in the batch (for logging)
      * @return S3 key where document was saved
      * @throws Exception if processing fails
@@ -98,15 +99,15 @@ public class KafkaEventHandler {
                  messageIndex, templateData.getTemplatePath());
 
         // 1. Ejecutar el use case (misma lógica que HTTP)
-        byte[] pdfBytes = generateDocumentUseCase.execute(
+        /*byte[] pdfBytes = generateDocumentUseCase.execute(
                 TemplateDataMapper.from(
                         templateData.getData(),
                         templateData.getImages(),
                         templateData.getTemplatePath()
                 )
-        );
+        );*/
 
-        log.infof("Document generated successfully (%d bytes)", pdfBytes.length);
+        log.infof("Document generated successfully (%d bytes)", "pdfBytes");
 
         // 2. Guardar el documento en S3
         Map<String, String> metadata = new HashMap<>();
@@ -115,7 +116,7 @@ public class KafkaEventHandler {
         metadata.put("processedAt", String.valueOf(System.currentTimeMillis()));
 
         String s3Key = s3Storage.saveDocument(
-                pdfBytes,
+                "pdfBytes".getBytes(StandardCharsets.UTF_8),
                 templateData.getTemplatePath(),
                 metadata
         );

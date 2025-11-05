@@ -21,15 +21,19 @@ export AWS_ACCESS_KEY_ID=test
 export AWS_SECRET_ACCESS_KEY=test
 export AWS_DEFAULT_REGION=us-east-1
 
-# Crear bucket S3
-echo "📦 Creando bucket S3: local-documents-bucket..."
+# Crear buckets S3
+echo "📦 Creando bucket S3 para documentos: local-documents-bucket..."
 aws --endpoint-url=http://localhost:4566 s3 mb s3://local-documents-bucket 2>/dev/null || echo "Bucket ya existe"
 
-# Verificar bucket
-echo "🔍 Verificando bucket..."
+echo "📦 Creando bucket S3 para templates: local-templates-bucket..."
+aws --endpoint-url=http://localhost:4566 s3 mb s3://local-templates-bucket 2>/dev/null || echo "Bucket ya existe"
+
+# Verificar buckets
+echo "🔍 Verificando buckets..."
 aws --endpoint-url=http://localhost:4566 s3 ls
 
 echo "✅ Setup de LocalStack completado!"
 echo ""
-echo "Para ver el contenido del bucket:"
+echo "Para ver el contenido de los buckets:"
 echo "  aws --endpoint-url=http://localhost:4566 s3 ls s3://local-documents-bucket/ --recursive"
+echo "  aws --endpoint-url=http://localhost:4566 s3 ls s3://local-templates-bucket/ --recursive"
