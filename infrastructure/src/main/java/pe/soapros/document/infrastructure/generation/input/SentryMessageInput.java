@@ -16,7 +16,7 @@ public class SentryMessageInput {
 
     @Data
     public static class DataNode {
-        // Solo necesitamos item_canonico para generar el documento
+        private JsonNode clienteData;
         private ItemCanonico item_canonico;
         // Los otros campos (cliente, clienteData, action) pueden ser JsonNode si no se usan
     }
