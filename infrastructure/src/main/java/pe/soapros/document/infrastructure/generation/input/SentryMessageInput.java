@@ -1,6 +1,7 @@
 package pe.soapros.document.infrastructure.generation.input;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -15,16 +16,24 @@ public class SentryMessageInput {
     private DataNode data;
 
     @Data
+    @ToString(exclude = {"clienteData"})
     public static class DataNode {
+        private JsonNode cliente;
         private JsonNode clienteData;
         private ItemCanonico item_canonico;
         // Los otros campos (cliente, clienteData, action) pueden ser JsonNode si no se usan
     }
 
+
     @Data
     public static class ItemCanonico {
-        // Contiene la lista de documentos (outputs) a generar
+        private String output_producto;
+        private String output_subproducto;
+        private JsonNode output_metadata;
         private List<OutputNode> outputs;
+        private JsonNode callback;
+        private JsonNode metadata;
+        private JsonNode _error;
     }
 
     @Data
@@ -35,6 +44,8 @@ public class SentryMessageInput {
 
     @Data
     public static class ComposicionNode {
+        private String template;
+        private JsonNode data;
         private String resource;
         private String type;
         private MetadataNode metadata;
@@ -52,6 +63,8 @@ public class SentryMessageInput {
         private String output_format;
         private String location;
         private JsonNode data;
+        private JsonNode error;
+        private JsonNode _error;
     }
 
     @Data

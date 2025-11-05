@@ -1,7 +1,9 @@
 package pe.soapros.document.infrastructure.lambda.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.f4b6a3.ulid.Ulid;
 import com.github.f4b6a3.ulid.UlidCreator;
+import io.smallrye.common.annotation.Blocking;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -30,6 +32,9 @@ public class DocumentLambdaResource {
     @Inject
     GenerateDocumentUseCase generateDocumentUseCase;
 
+    @Inject
+    ObjectMapper objectMapper;
+
     @ConfigProperty(name = "app.generation.temp", defaultValue = "/temp")
     String tempDirectory;
 
@@ -47,6 +52,7 @@ public class DocumentLambdaResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @Blocking
     public Response generate(SentryMessageInput input) throws DocumentGenerationException {
         int outputCount = 0;
         if (input.getData() != null &&
@@ -71,7 +77,29 @@ public class DocumentLambdaResource {
         SentryMessageInput responseMessage = SentryMessageMapper.updateWithGeneratedDocuments(input, results);
 
         // Retornar el mismo mensaje con result.location actualizado
-        return Response.ok(responseMessage).build();
+        //return Response.ok(responseMessage).build();
+        try {
+            log.debug("Iniciando serialización JSON manual para evitar el proveedor JAX-RS.");
+
+            // Convertir el objeto final a un array de bytes
+            byte[] jsonBytes = objectMapper.writeValueAsBytes(responseMessage);
+
+            log.infof("JSON de respuesta serializado manualmente (%d bytes).", jsonBytes.length);
+
+            // 3. Devolver los bytes directamente con el MediaType correcto
+            return Response.ok(jsonBytes)
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build();
+
+        } catch (Exception e) {
+            log.errorf(e, "CRÍTICO: Fallo durante la serialización JSON manual de la respuesta.");
+
+            // Retornar un error 500 simple si la serialización falla
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"SERVER_SERIALIZATION_ERROR\", \"message\": \"Fallo al serializar el cuerpo de la respuesta.\"}")
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build();
+        }
     }
 
     /**
