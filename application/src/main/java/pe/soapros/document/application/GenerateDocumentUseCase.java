@@ -67,12 +67,7 @@ public class GenerateDocumentUseCase {
             throw new TemplateProcessingException("Failed to write document to file path: " + pathFile, e);
         }
 
-        // Persist to repository if requested
-        String repositoryPath = null;
-        if (data.isPersist()) {
-            repositoryPath = this.repository.save(pathFile);
-        }
-
-        return new DocumentResult(documentGenerate, pathFile, repositoryPath);
+        String localPathWithProtocol = "fs@" + pathFile;
+        return new DocumentResult(documentGenerate, localPathWithProtocol);
     }
 }

@@ -8,7 +8,6 @@ import lombok.Data;
  * Contains both the document bytes and the path where it was saved.
  */
 @Data
-@AllArgsConstructor
 public class DocumentResult {
     /**
      * The generated document bytes
@@ -33,6 +32,8 @@ public class DocumentResult {
      * @param localPath the local file path
      */
     public DocumentResult(byte[] documentBytes, String localPath) {
-        this(documentBytes, localPath, null);
+        //this(documentBytes, localPath, null);
+        this.documentBytes = documentBytes;
+        this.localPath = localPath;
     }
 }
