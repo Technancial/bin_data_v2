@@ -56,6 +56,13 @@
             <artifactId>quarkus-rest-jackson</artifactId>
         </dependency>
 
+        <!-- Kafka Reactive Messaging for batch processing -->
+        <!-- Includes SmallRye Reactive Messaging API automatically -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-messaging-kafka</artifactId>
+        </dependency>
+
         <!-- AWS Lambda HTTP handler (handles both HTTP and custom events) -->
         <dependency>
             <groupId>io.quarkus</groupId>
