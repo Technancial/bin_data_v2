@@ -52,6 +52,9 @@ public class LambdaMskEventHandler {
     ObjectMapper objectMapper;
 
     @Inject
+    SentryMessageMapper sentryMessageMapper;
+
+    @Inject
     DocumentResultProducer kafkaProducer;
 
     @ConfigProperty(name = "app.generation.temp", defaultValue = "/temp")
@@ -147,14 +150,14 @@ public class LambdaMskEventHandler {
             log.debugf("Processing message with %d outputs", outputCount);
 
             // Pipeline funcional (igual que DocumentLambdaResource)
-            List<TemplateRequest> templates = SentryMessageMapper.toTemplateRequest(input);
+            List<TemplateRequest> templates = sentryMessageMapper.toTemplateRequest(input);
 
             List<DocumentResult> documentResults = templates.parallelStream()
                 .map(this::generateDocument)
                 .collect(Collectors.toList());
 
             // Actualizar input original con rutas generadas
-            SentryMessageInput updatedInput = SentryMessageMapper
+            SentryMessageInput updatedInput = sentryMessageMapper
                 .updateWithGeneratedDocuments(input, documentResults);
 
             return ProcessResult.success(updatedInput);

@@ -36,6 +36,9 @@ public class DocumentLambdaResource {
     @Inject
     ObjectMapper objectMapper;
 
+    @Inject
+    SentryMessageMapper sentryMessageMapper;
+
     @ConfigProperty(name = "app.generation.temp", defaultValue = "/temp")
     String tempDirectory;
 
@@ -64,7 +67,7 @@ public class DocumentLambdaResource {
         log.infof("Processing document generation request - outputs: %d", outputCount);
 
         // Mapear el DTO complejo del Sentry Business Message a una lista plana de templates
-        List<TemplateRequest> templates = SentryMessageMapper.toTemplateRequest(input);
+        List<TemplateRequest> templates = sentryMessageMapper.toTemplateRequest(input);
         log.infof("Generating %d documents", templates.size());
 
         // Generar cada documento (retorna DocumentResult con bytes y paths)
@@ -75,7 +78,7 @@ public class DocumentLambdaResource {
         log.infof("Successfully generated %d documents", results.size());
 
         // Actualizar el input original con las rutas de los documentos generados
-        SentryMessageInput responseMessage = SentryMessageMapper.updateWithGeneratedDocuments(input, results);
+        SentryMessageInput responseMessage = sentryMessageMapper.updateWithGeneratedDocuments(input, results);
 
         // Retornar el mismo mensaje con result.location actualizado
         //return Response.ok(responseMessage).build();

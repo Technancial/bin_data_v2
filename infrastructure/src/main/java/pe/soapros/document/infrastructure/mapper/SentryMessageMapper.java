@@ -3,6 +3,8 @@ package pe.soapros.document.infrastructure.mapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import pe.soapros.document.domain.DocumentResult;
 import pe.soapros.document.domain.TemplateRequest;
 import pe.soapros.document.domain.exception.InvalidTemplateDataException;
@@ -12,9 +14,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Mapper para convertir mensajes de Sentry a TemplateRequest y viceversa.
+ *
+ * Optimizado para reutilizar ObjectMapper inyectado en lugar de crear
+ * una instancia static, permitiendo mejor configuración y testing.
+ */
+@ApplicationScoped
 public class SentryMessageMapper {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    @Inject
+    ObjectMapper objectMapper;
 
     /**
      * Convierte un mensaje de Sentry a una lista plana de TemplateRequest.
@@ -30,7 +40,7 @@ public class SentryMessageMapper {
      * @return lista plana de TemplateRequest (uno por cada template a generar)
      * @throws InvalidTemplateDataException si la estructura del mensaje es inválida
      */
-    public static List<TemplateRequest> toTemplateRequest(SentryMessageInput sentryMessage) throws InvalidTemplateDataException {
+    public List<TemplateRequest> toTemplateRequest(SentryMessageInput sentryMessage) throws InvalidTemplateDataException {
         // 1. Validar existencia de la ruta crítica
         if (sentryMessage == null || sentryMessage.getData() == null || sentryMessage.getData().getItem_canonico() == null) {
             throw new InvalidTemplateDataException("El mensaje de Sentry está incompleto o le falta 'data.item_canonico'.");
@@ -59,7 +69,7 @@ public class SentryMessageMapper {
                                 if (templateDataNode == null || templateDataNode.isNull()) {
                                     throw new InvalidTemplateDataException("El nodo de datos de la plantilla está vacío.");
                                 }
-                                Map<String, Object> dataMap = MAPPER.convertValue(templateDataNode, new TypeReference<Map<String, Object>>() {});
+                                Map<String, Object> dataMap = objectMapper.convertValue(templateDataNode, new TypeReference<Map<String, Object>>() {});
 
                                 // Extraer imágenes si existen
                                 Map<String, String> imagesMap = extractImages(templateDataNode);
@@ -105,11 +115,11 @@ public class SentryMessageMapper {
     /**
      * Extrae el mapa de imágenes (Base64) del nodo de datos si existe.
      */
-    private static Map<String, String> extractImages(JsonNode dataNode) {
+    private Map<String, String> extractImages(JsonNode dataNode) {
         // El JSON de ejemplo tiene un nodo 'images' dentro del nodo 'data' principal.
         if (dataNode.has("images") && dataNode.get("images").isObject()) {
             try {
-                return MAPPER.convertValue(dataNode.get("images"), new TypeReference<Map<String, String>>() {});
+                return objectMapper.convertValue(dataNode.get("images"), new TypeReference<Map<String, String>>() {});
             } catch (IllegalArgumentException e) {
                 // El log ya capturaría el error en la generación, pero devolvemos vacío para no fallar el mapeo inicial
                 return Collections.emptyMap();
@@ -131,7 +141,7 @@ public class SentryMessageMapper {
      * @return el mismo SentryMessageInput modificado (para conveniencia)
      * @throws InvalidTemplateDataException si hay inconsistencias en la estructura
      */
-    public static SentryMessageInput updateWithGeneratedDocuments(
+    public SentryMessageInput updateWithGeneratedDocuments(
             SentryMessageInput sentryMessage,
             List<DocumentResult> results) throws InvalidTemplateDataException {
 
